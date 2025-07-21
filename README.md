@@ -1,58 +1,87 @@
+# CDK Example for Lambda, Scheduling, & Optional Table Access
 
-# Welcome to your CDK Python project!
+This is a hobby project meant for use in a single AWS environment, for things like scheduling Lambda jobs with optional DynamoDB access.
 
-This is a blank project for CDK development with Python.
+## Setup: Python Virtual Environment (MacOS/Linux)
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
-
-To manually create a virtualenv on MacOS and Linux:
-
-```
-$ python3 -m venv .venv
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
+### On Windows:
 
-```
-$ source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
+```bat
+.venv\Scripts\activate.bat
 ```
 
-Once the virtualenv is activated, you can install the required dependencies.
+---
 
+## Deployment Steps
+
+At this point you can now synthesize the CloudFormation template for this code. Docker must be running for these steps to work, sanity check with `docker ps`
+
+### Bootstrap your environment (run once per account/region):
+
+```bash
+cdk bootstrap
 ```
-$ pip install -r requirements.txt
+
+### Synthesize and deploy the stack:
+
+```bash
+cdk synth
+cdk deploy
 ```
 
-At this point you can now synthesize the CloudFormation template for this code.
+Your main CDK stack lives in `lambdas/lambdas_stack.py`.
+If you're setting up a DynamoDB table (optional), this file includes an example configuration for that as well.
 
+> ⚠️ You're responsible for your own AWS charges. This is a hobby setup — keep track of what resources are live, especially if you enable periodic/scheduled jobs or create a DynamoDB table.
+
+To add additional dependencies, for example other CDK libraries, just add them to your `setup.py` file and rerun the `pip install -r requirements.txt` command.
+
+Update the lambda in `sample-lambda/app.py` and its `sample-lambda/requirements.txt` file to actually make changes to your lambda. At present, the lambda calls an API an returns part of its response.
+
+### Clean up:
+
+```bash
+cdk destroy
 ```
-$ cdk synth
+
+---
+
+## Useful CDK Commands
+
+* `cdk ls` - list stacks in your app
+* `cdk synth` - emit synthesized CloudFormation template
+* `cdk deploy` - deploy the current stack
+* `cdk diff` - compare deployed stack with local changes
+* `cdk docs` - open CDK documentation
+
+---
+
+## Local Lambda Testing via Docker
+
+Build and run your Lambda container locally. This is mostly useful for testing.
+Update the name (`hello-world-lambda`) and path (`sample-lambda/`) as needed.
+
+```bash
+docker build -t hello-world-lambda sample-lambda/
+docker run -p 9000:8080 hello-world-lambda
 ```
 
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+In a second terminal, invoke the container with:
 
-## Useful commands
+```bash
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+```
 
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
+Or test with a scheduled event payload:
 
-Enjoy!
+```bash
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
+  -d '{"source": "aws.events", "detail-type": "Scheduled Event"}'
+```
+---
