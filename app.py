@@ -3,7 +3,7 @@ import os
 
 import aws_cdk as cdk
 
-from lambda_cdk.lambdas_deployment_stack import LambdaDeploymentStack
+from lambda_cdk.lambda_deployment_stack import LambdaDeploymentStack
 
 # Don't update - leave as is until you know what you are doing
 app = cdk.App()
