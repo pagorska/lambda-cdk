@@ -10,7 +10,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
-class LambdasStack(Stack):
+class LambdaDeploymentStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -35,10 +35,11 @@ class LambdasStack(Stack):
         )
         '''
 
-
+        # Lambda function using container image
+        # Duplicate this block for additional lambdas, update the name and path accordingly
         hello_lambda = _lambda.Function(
             self, 'HelloWorldFunction',
-            code=_lambda.Code.from_asset_image('sample-lambda'),
+            code=_lambda.Code.from_asset_image('lambdas/sample-lambda'),
             handler=_lambda.Handler.FROM_IMAGE,
             runtime=_lambda.Runtime.FROM_IMAGE,
             memory_size=128,  # minimum for container images

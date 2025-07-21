@@ -3,11 +3,11 @@ import os
 
 import aws_cdk as cdk
 
-from lambdas.lambdas_stack import LambdasStack
+from lambda_cdk.lambdas_deployment_stack import LambdaDeploymentStack
 
 # Don't update - leave as is until you know what you are doing
 app = cdk.App()
-LambdasStack(app, "LambdasStack",
+LambdaDeploymentStack(app, "LambdaDeploymentStack",
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
     # but a single synthesized template can be deployed anywhere.

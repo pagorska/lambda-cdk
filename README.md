@@ -2,6 +2,12 @@
 
 This is a hobby project meant for use in a single AWS environment, for things like scheduling Lambda jobs with optional DynamoDB access.
 
+## Prerequisites 
+
+* AWS Account
+* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) & [completed setup](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html)
+* AWS CDK - `npm install -g aws-cdk`
+
 ## Setup: Python Virtual Environment (MacOS/Linux)
 
 ```bash
@@ -42,7 +48,11 @@ If you're setting up a DynamoDB table (optional), this file includes an example 
 
 To add additional dependencies, for example other CDK libraries, just add them to your `setup.py` file and rerun the `pip install -r requirements.txt` command.
 
-Update the lambda in `sample-lambda/app.py` and its `sample-lambda/requirements.txt` file to actually make changes to your lambda. At present, the lambda calls an API an returns part of its response.
+Update the lambda in `lambdas/sample-lambda/app.py` and its `lambdas/sample-lambda/requirements.txt` file to actually make changes to your lambda. At present, the lambda calls an API an returns part of its response. Feel free to use only one lambda per folder, or duplicate the sample lambda and its setup to add additonal lambdas. To not overcomplicate things, copy over the sample lambda to a new folder when you'd like to add more lambdas, and update the `lambda-cdk/lambdas_deployment_stack.py`.
+
+```
+cp -r lambdas/sample-lambda lambdas/second-lambda
+```
 
 ### Clean up:
 
