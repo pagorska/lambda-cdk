@@ -90,7 +90,25 @@ cdk destroy
 - Verify no unexpected charges on your AWS bill
 - Consider cleaning up ECR repositories if no longer needed
 ---
+## Project Structure
 
+```
+├── lambda_cdk/
+│   ├── lambda_deployment_stack.py # Main CDK stack
+│   └── __init__.py
+├── lambdas/
+│   └── sample-lambda/
+│       ├── app.py                # Lambda function code
+│       ├── requirements.txt      # Lambda dependencies
+│       └── Dockerfile           # Container configuration
+├── tests/
+├── .github/workflows/deploy.yml  # GitHub Actions workflow (if exists)
+├── app.py                       # CDK app entry point
+├── cdk.json                     # CDK configuration
+├── requirements.txt             # CDK dependencies
+└── source.bat                   # Windows activation script
+```
+---
 ## Useful CDK Commands
 
 * `cdk ls` - list stacks in your app
