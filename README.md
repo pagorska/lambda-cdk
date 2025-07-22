@@ -17,7 +17,7 @@ This repository provides a sample Dockerized Python Lambda function with EventBr
 * [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) & [completed setup](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html)
 * AWS CDK - `npm install -g aws-cdk`
 * Docker
-- Python 3.7+
+* Python 3.7+
 
 ## Quick Start
 
