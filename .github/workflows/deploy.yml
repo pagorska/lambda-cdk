@@ -7,7 +7,7 @@ on:
 env:
   AWS_REGION: us-east-1  # Change to your preferred region
   PYTHON_VERSION: '3.12'
-  NODE_VERSION: '18'  
+  NODE_VERSION: '22'  
 
 jobs:
   deploy:
