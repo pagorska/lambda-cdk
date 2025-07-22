@@ -2,11 +2,12 @@ from aws_cdk import (
     Duration,
     Stack,
     CfnOutput,
+    RemovalPolicy,
     aws_lambda as _lambda,
     aws_events as events,
     aws_events_targets as targets,
     aws_iam as iam,
-    aws_dynamodb as dynamodb
+    aws_dynamodb as dynamodb,
 )
 from constructs import Construct
 
@@ -23,7 +24,8 @@ class LambdaDeploymentStack(Stack):
                 name="id",
                 type=dynamodb.AttributeType.STRING
             ),
-            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            #removal_policy=RemovalPolicy.RETAIN # Uncomment to retain table on stack deletion
         )
         '''
         
