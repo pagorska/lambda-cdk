@@ -148,10 +148,10 @@ cdk destroy
 ## Local Lambda Testing via Docker
 
 Builds and run your Lambda container locally. This is mostly useful for local testing.
-Update the name (`hello-world-lambda`) and path (`sample-lambda/`) as needed.
+Update the name (`hello-world-lambda`) and path (`lambdas/sample-lambda/`) as needed.
 
 ```bash
-docker build -t hello-world-lambda sample-lambda/
+docker build -t hello-world-lambda lambdas/sample-lambda/
 docker run -p 9000:8080 hello-world-lambda
 ```
 
