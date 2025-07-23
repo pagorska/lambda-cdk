@@ -11,6 +11,22 @@ This repository provides a sample Dockerized Python Lambda function with EventBr
 - **OIDC Authentication**: Secure GitHub-to-AWS authentication setup
 - **Optional DynamoDB**: Database configuration examples
 
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Project Structure](#project-structure)
+- [Quick Start](#quick-start)
+  - [1. Environment Setup](#1-environment-setup)
+  - [2. Deploy to AWS](#2-deploy-to-aws)
+  - [3. Customize Your Lambda](#3-customize-your-lambda)
+  - [4. Optional: Adding More Lambdas](#4-optional-adding-more-lambdas)
+  - [5. Optional: Clean Up](#5-optional-clean-up)
+- [Useful CDK Commands](#useful-cdk-commands)
+- [Local Lambda Testing via Docker](#local-lambda-testing-via-docker)
+- [GitHub Actions Setup (Optional)](#github-actions-setup-optional)
+- [Further Examples](#further-examples)
+
+---
 ## Prerequisites 
 
 * AWS Account
@@ -19,6 +35,27 @@ This repository provides a sample Dockerized Python Lambda function with EventBr
 * Docker
 * Python 3.7+
 
+---
+## Project Structure
+
+```
+├── lambda_cdk/
+│   ├── lambda_deployment_stack.py # Main CDK stack
+│   └── __init__.py
+├── lambdas/
+│   └── sample-lambda/
+│       ├── app.py                # Lambda function code
+│       ├── .env                  # Lambda environment variables
+│       ├── requirements.txt      # Lambda dependencies
+│       └── Dockerfile            # Container configuration
+├── tests/
+├── .github/workflows/deploy.yml  # GitHub Actions workflow (if exists)
+├── app.py                        # CDK app entry point
+├── cdk.json                      # CDK configuration
+├── requirements.txt              # CDK dependencies
+└── source.bat                    # Windows activation script
+```
+---
 ## Quick Start
 
 ### 1. Environment Setup
@@ -29,7 +66,7 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate.bat
 pip install -r requirements.txt
 ```
 
-> **Note**: If you run into venv issues, just run `rm -rf .venv` and start over.
+> **Note**: If you run into venv issues, just run `rm -rf .venv` and start over. Run your CDK commands within your venv.
 
 ### 2. Deploy to AWS
 
@@ -48,10 +85,13 @@ cdk deploy
 At this point, you'll be able to verify and observe the creation of the resources in the AWS Console. 
 
 Your main CDK stack configuration is in `lambda_cdk/lambda_deployment_stack.py`.
+If you use this template multiple times for different projects, update the name of the `LambdaDeploymentStack` in `lambda_cdk/lambda_deployment_stack.py` and `app.py`. Two different projects/repos with the same stack name will overwrite each other.
 
 If you're setting up a DynamoDB table (optional), this file includes an example configuration for that as well.
 
-> ⚠️ You're responsible for your own AWS charges. This is a hobby setup — keep track of what resources are live, especially if you enable periodic/scheduled jobs or create a DynamoDB table.
+> ⚠️ You're responsible for your own AWS charges. This is a hobby setup — keep track of what resources are live, especially if you enable periodic/scheduled jobs or create a DynamoDB table. Add tags to your resources to keep track of them.
+
+If you'd like to set up Github Actions to instead deploy on pushes to main, follow the instructions in [GitHub Actions Setup (Optional)](#adding-your-own-logic).
 
 ### 3. Customize Your Lambda
 
@@ -60,6 +100,10 @@ Update the Lambda function in `lambdas/sample-lambda/app.py` and its dependencie
 To add additional dependencies, for example other CDK libraries, just add them to your `setup.py` file and rerun the `pip install -r requirements.txt` command.
 
 Update the lambda in `lambdas/sample-lambda/app.py` and its `lambdas/sample-lambda/requirements.txt` file to actually make changes to your lambda. At present, the lambda calls an API an returns part of its response. 
+
+With any changes you'd like to deploy, repeat the deployment instructions in step 2. 
+
+
 ### 4. Optional: Adding More Lambdas
 
 Feel free to use only one lambda per folder, or duplicate the sample lambda and its setup to add additonal lambdas. To not overcomplicate things, copy over the sample lambda to a new folder:
@@ -69,6 +113,7 @@ cp -r lambdas/sample-lambda lambdas/second-lambda
 ```
 
 Update `lambda_cdk/lambda_deployment_stack.py` to include the new lambda.
+
 
 ### 5. Optional: Clean Up
 
@@ -89,25 +134,7 @@ cdk destroy
 - Check the AWS Console to ensure resources were deleted
 - Verify no unexpected charges on your AWS bill
 - Consider cleaning up ECR repositories if no longer needed
----
-## Project Structure
 
-```
-├── lambda_cdk/
-│   ├── lambda_deployment_stack.py # Main CDK stack
-│   └── __init__.py
-├── lambdas/
-│   └── sample-lambda/
-│       ├── app.py                # Lambda function code
-│       ├── requirements.txt      # Lambda dependencies
-│       └── Dockerfile           # Container configuration
-├── tests/
-├── .github/workflows/deploy.yml  # GitHub Actions workflow (if exists)
-├── app.py                       # CDK app entry point
-├── cdk.json                     # CDK configuration
-├── requirements.txt             # CDK dependencies
-└── source.bat                   # Windows activation script
-```
 ---
 ## Useful CDK Commands
 
@@ -140,13 +167,19 @@ Or test with a scheduled event payload:
 curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
   -d '{"source": "aws.events", "detail-type": "Scheduled Event"}'
 ```
+
 ---
+
 ## GitHub Actions Setup (Optional)
 This template uses [OpenID Connect (OIDC)](https://docs.github.com/en/actions/concepts/security/openid-connect) to grant Github depoyment access. If you prefer to deploy locally with `cdk deploy`, you can delete `.github/workflows/deploy.yml`.
 ### OIDC Configuration Steps
-1. **Once Per Repo:** After cloning, add your AWS Account ID to Settings > Secrets and variables > Actions > Repository secrets, named `AWS_ACCOUNT_ID`. 
+1. **Once Per Repo:** After cloning, add your AWS Account ID Repository Secrets, found under Settings > Secrets and variables > Actions > Repository secrets, and name it `AWS_ACCOUNT_ID`. 
+![AWS_ACCOUNT_ID Example](https://github-readmes.s3.us-east-1.amazonaws.com/lambda-example/github%20repo%20secrets)
 2. **Once Per AWS Account:** Go to the AWS Console > IAM, and set up an identity provider. Follow the Github instructions for [Adding the identity provider to AWS](https://docs.github.com/en/actions/how-tos/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services#adding-the-identity-provider-to-aws). Select OpenID Connect for the provider type, `https://token.actions.githubusercontent.com/` for the provider URL, and `sts.amazonaws.com` for the audience.
-3. **Once Per AWS Account:** Still under IAM, navigate to Roles and create a new role. Follow the AWS instructions for [Creating a role for OIDC](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-idp_oidc.html#idp_oidc_Create). When creating a new role, select 'Web identity' for the trusted entity type,  `https://token.actions.githubusercontent.com/` for the identity provider from the dropdown, and `sts.amazonaws.com` for the audience from the dropdown. Use your Github username for the organization (or the organization where you clone your repository). For personal development, add the AdministratorAccess policy. Name the policy `GitHubActionsRole`, which is what is used in the `deploy.yml`.Your policy should look something like this:
+![Identity Provider Example](https://github-readmes.s3.us-east-1.amazonaws.com/lambda-example/identity%20provider)
+3. **Once Per AWS Account:** Still under IAM, navigate to Roles and create a new role. Follow the AWS instructions for [Creating a role for OIDC](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-idp_oidc.html#idp_oidc_Create). When creating a new role, select 'Web identity' for the trusted entity type,  `https://token.actions.githubusercontent.com/` for the identity provider from the dropdown, and `sts.amazonaws.com` for the audience from the dropdown. Use your Github username for the organization (or the organization where you clone your repository). For personal development, add the AdministratorAccess policy. Name the policy `GitHubActionsRole`, which is what is used in the `deploy.yml`. 
+![Identity Provider Example](https://github-readmes.s3.us-east-1.amazonaws.com/lambda-example/roles%20trusted%20entity)
+Your policy should look something like this:
 ```json
 {
     "Version": "2012-10-17",
@@ -162,11 +195,17 @@ This template uses [OpenID Connect (OIDC)](https://docs.github.com/en/actions/co
                     "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
                 },
                 "StringLike": {
-                    "token.actions.githubusercontent.com:sub": "repo:pagorska/*"
+                    "token.actions.githubusercontent.com:sub": "repo:{github-org}/*"
                 }
             }
         }
     ]
 }
 ```
+
 Once configured, pushes to the main branch **which begin with 'deploy:'** will automatically deploy to AWS. Consider the permissions to your repository with these or any Github actions on push to main.
+
+---
+## Further Examples
+
+[Web Scraper + Discord Alert Lambda](https://github.com/pagorska/ross-lake-bot)
